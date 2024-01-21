@@ -27,7 +27,11 @@
     try {
       // Obtenció de la transmissió (display media o el que hi ha a la pantalla) amb opcions de vídeo
       mediaStream = await navigator.mediaDevices.getDisplayMedia({
-        video: { frameRate: { ideal: 30 } }
+        //Grava el video de la pantalla
+        video: { frameRate: { ideal: 30 } },
+        // Grava l'àudio de la pantalla/sistema només gràcies a que posem deviceId amb { exact: "default" } 
+        // que indica que selecciona l'àudio del sistema, evitant així capturar l'àudio del microfon de l'ordinador
+        audio: { echoCancellation: true, noiseSuppression: true, deviceId: { exact: "default" } } 
       });
 
       // Creació de la instància de MediaRecorder amb la transmissió 
