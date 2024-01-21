@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Screen recorder</title>
+</head>
+<body>
+
+<!-- Botó per iniciar la grabació -->
+<button id="startButton">Start recording</button>
+
+<!-- Botó per aturar la grabació -->
+<button id="stopButton" disabled>Stop recording</button>
+
+<script>
+  // Selecció dels elements del DOM pel seu ID
+  const $startButton = document.getElementById('startButton');
+  const $stopButton = document.getElementById('stopButton');
+
+  // Variables per desar la instància de MediaRecorder i la transmissió 
+  let mediaRecorder;
+  let mediaStream;
+
+  // Gestor d'esdeveniments per al botó d'inici
+  $startButton.addEventListener('click', async () => {
+    try {
+      // Obtenció de la transmissió (display media o el que hi ha a la pantalla) amb opcions de vídeo
+      mediaStream = await navigator.mediaDevices.getDisplayMedia({
+        video: { frameRate: { ideal: 30 } }
+      });
+
+      // Creació de la instància de MediaRecorder amb la transmissió 
+      mediaRecorder = new MediaRecorder(mediaStream, {
+        mimeType: 'video/webm; codecs=vp8, opus'
+      });
+
+      // Inici de la gravació
+      mediaRecorder.start();
+
+      // Desactivació del botó d'inici i activació del botó d'aturar un cop ja grava
+      $startButton.disabled = true;
+      $stopButton.disabled = false;
+
+      // Gestor d'esdeveniments per a les dades disponibles (final de la gravació)
+      mediaRecorder.addEventListener("dataavailable", (e) => {
+        // Creació d'un enllaç per descarregar el fitxer webm
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(e.data);
+        link.download = "screen_record.webm";
+        link.click();
+      });
+
+    } catch (error) {
+      console.error('Error!!!', error);
+    }
+  });
+
+  // Gestor d'esdeveniments per al botó de parar la gravació
+  $stopButton.addEventListener('click', () => {
+    // Aturada de la gravació i parada de totes les pistes de la transmissió
+    mediaRecorder.stop();
+    mediaStream.getTracks().forEach(track => track.stop());
+
+    // Reactivació del botó d'inici i desactivació del botó d'aturar
+    $startButton.disabled = false;
+    $stopButton.disabled = true;
+  });
+</script>
+
+</body>
+</html>
